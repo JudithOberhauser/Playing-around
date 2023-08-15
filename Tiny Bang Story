@@ -1,5 +1,5 @@
 def fit_the_tiles(boardwidth, boardheight, tiles):
-    ''' IN: boardwidth: positive int; boardwidth: positive int; tiles: list of tiles
+    ''' IN: boardwidth: positive int; boardheight: positive int; tiles: list of tiles
         Each tile is a list of lists representig the rows of the tile from top to bottom.
         They consist of zeros for negative space and ones where there are parts of the tile.
         OUT: board with tiles sorted in
