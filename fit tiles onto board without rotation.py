@@ -1,0 +1,167 @@
+def fit_the_tiles(boardwidth, boardheight, tiles):
+    ''' IN: boardwidth: positive int; boardwidth: positive int; tiles: list of tiles
+        Each tile is a list of lists representig the rows of the tile from top to bottom.
+        They consist of zeros for negative space and ones where there are parts of the tile.
+        OUT: board with tiles sorted in
+        expample input: fit_the_tiles(4, 2, [[[1]], [[1,1]], [[0,1,0,0],[1,1,1,1]]])
+    '''
+    board = [[0 for j in range(boardwidth)] for i in range(boardheight)]
+    ## always fit each tile in starting from [0,0]
+    positions = [[0,0] for tile in tiles]
+    remainingtiles = tiles.copy()
+    ## fit in the first tile
+    firsttile = tiles[0]
+    hight = len(firsttile)
+    width = len(firsttile[0])
+    for n in range(hight):
+        for m in range(width):
+           board[n][m] = firsttile[n][m]
+    placedtiles = [firsttile]
+    remainingtiles.remove(firsttile)
+    firsttry = True
+    ## fit in all other tiles, workig from the first tile to the last;
+    ## firsttry keeps track of whether all tiles after the tile fit in 
+    while remainingtiles != []:
+        tile = remainingtiles[0]
+        if firsttry == True:
+            positions[tiles.index(tile)] = [0,0]
+            position = [0,0]
+        else:
+            position = positions[tiles.index(tile)]
+        newposition = fit_tile(board, tile, position, firsttry)
+        ## in case the next tile doesn't fit anywhere, the previous tile needs to be removed from the board and relocated
+        if newposition == False:
+            remainingtiles.insert(0,placedtiles.pop())
+            tile = remainingtiles[0]
+            position = positions[tiles.index(tile)]
+            hight = len(tile)
+            width = len(tile[0])
+            for n in range(hight):
+                for m in range(width):
+                    board[position[0]+n][position[1]+m] -= tile[n][m]
+            firsttry = False
+        ## otherwise, the next possible position of the tile is saved
+        else:
+            placedtiles.append(remainingtiles.pop(0))
+            positions[tiles.index(tile)] = newposition
+            hight = len(tile)
+            width = len(tile[0])
+            for n in range(hight):
+                for m in range(width):
+                    board[newposition[0]+n][newposition[1]+m] += tile[n][m]
+            firsttry = True
+    # lastly, draw the board in such a way that each tile consists of its index number 
+    newboard = board
+    for tile in placedtiles:
+        height = len(tile)
+        width = len(tile[0])
+        indx = placedtiles.index(tile)
+        position = positions[indx]
+        for i in range(height):
+            for j in range(width):
+                if tile[i][j] == 1:
+                    newboard[position[0]+i][position[1]+j] = indx
+    print(*newboard, sep='\n')
+
+
+def fit_tile(board, tile, position, firsttry):
+    hight = len(tile)
+    width = len(tile[0])
+    if firsttry == True:
+        ## in this case the next tile needs to find a place on the board.
+        ## If a position causes two tiles to overlap, the sum of the number on the board (placed tiles)
+        ## plus the new tile will be 2 
+        for i in range(position[0], len(board)-hight+1):
+            for j in range(position[1], len(board[0])-width+1):
+                fits = True
+                for n in range(hight):
+                    for m in range(width):
+                        if board[i+n][j+m] + tile[n][m] == 2:
+                            fits = False
+                            break
+                    if fits == False:
+                        break
+                if fits == True:
+                    return [i,j]
+        return False
+    else:
+        ## in this case the previous tile needs to be moved further along
+        for i in range(position[0], len(board)-hight+1):
+            if i == position[0]:
+                for j in range(position[1]+1, len(board[0])-width+1):
+                    fits = True
+                    for n in range(hight):
+                        for m in range(width):
+                            if board[i+n][j+m] + tile[n][m] == 2:
+                                fits = False
+                                break
+                        if fits == False:
+                            break
+                    if fits == True:
+                        return [i,j]
+            else:
+                for j in range(0, len(board[0])-width+1):
+                    fits = True
+                    for n in range(hight):
+                        for m in range(width):
+                            if board[i+n][j+m] + tile[n][m] == 2:
+                                fits = False
+                                break
+                        if fits == False:
+                            break
+                    if fits == True:
+                        return [i,j]
+        return False
+
+print("Example 1")
+t0 = [[1]]
+t1 = [[1,1]]
+t2 = [[0,1,0,0],[1,1,1,1]]
+tiles = [t0, t1, t2]
+print("t0 = [[1]]")
+print("t1 = [[1,1]]")
+print("t2 = [[0,1,0,0],[1,1,1,1]]")
+print("tiles = [t0, t1, t2]")
+print("fit_the_tiles(4, 2, tiles)")
+fit_the_tiles(4, 2, tiles)
+
+print("Example 2")
+t0 = [[1]]
+t1 = [[1,1],[1,0]]
+tiles = [t0, t1]
+print("t0 = [[1]]")
+print("t1 = [[1,1],[1,0]]")
+print("tiles = [t0, t1]")
+print("fit_the_tiles(4, 2, tiles)")
+fit_the_tiles(2, 2, tiles)
+
+print("Example 3")
+t0 = [[0,1,0],[0,1,0],[1,1,1]]
+t1 = [[0,1,0],[1,1,1],[0,1,0]]
+t2 = [[1,0,0],[1,1,0],[0,1,1]]
+t3 = [[1,1],[1,0],[1,0]]
+t4 = [[1,1,0,0],[0,1,1,1]]
+t5 = [[1,1,1,1],[0,1,0,0]]
+t6 = [[0,0,1],[1,1,1]]
+t7 = [[0,1,0],[1,1,1],[0,0,1]]
+t8 = [[1],[1],[1],[1],[1]]
+t9 = [[1]]
+t10 = [[1,1],[0,1],[0,1]]
+tiles = [t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10]
+print("t0 = [[0,1,0],[0,1,0],[1,1,1]]")
+print("t1 = [[0,1,0],[1,1,1],[0,1,0]]")
+print("t2 = [[1,0,0],[1,1,0],[0,1,1]]")
+print("t3 = [[1,1],[1,0],[1,0]]")
+print("t4 = [[1,1,0,0],[0,1,1,1]]")
+print("t5 = [[1,1,1,1],[0,1,0,0]]")
+print("t6 = [[0,0,1],[1,1,1]]")
+print("t7 = [[0,1,0],[1,1,1],[0,0,1]]")
+print("t8 = [[1],[1],[1],[1],[1]]")
+print("t9 = [[1]]")
+print("t10 = [[1,1],[0,1],[0,1]]")
+print("tiles = [t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10]")
+print("fit_the_tiles(4, 2, tiles)")
+fit_the_tiles(8, 6, tiles)  
+
+
+
